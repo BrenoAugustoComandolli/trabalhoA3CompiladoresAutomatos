@@ -1,17 +1,14 @@
 package domain.analise;
 
+import java.util.List;
+import java.util.Map;
+
 import data.DadosCompilacao;
 
 public interface IAnaliseConteudo {
 
-	void analisaLexica(DadosCompilacao dados);
+	Map<TipoLexama, List<String>> analisaLexica(DadosCompilacao dados);
 	void analisaSintatica(DadosCompilacao dados);
 	void analisaSemantica(DadosCompilacao dados);
-
-	default void analisaCompleta(DadosCompilacao dados) {
-		analisaLexica(dados);
-		analisaSintatica(dados);
-		analisaSemantica(dados);
-	}
 
 }

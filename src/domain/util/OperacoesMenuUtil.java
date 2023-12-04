@@ -1,11 +1,15 @@
 package domain.util;
 
 import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 import data.DadosCompilacao;
 import domain.analise.AnaliseConteudoImpl;
 import domain.analise.IAnaliseConteudo;
+import domain.analise.TipoLexama;
 
 public class OperacoesMenuUtil {
 
@@ -20,7 +24,7 @@ public class OperacoesMenuUtil {
 		
 		if(conteudoArq.isBlank()) {
 			System.out.println("-------------------------------------------");
-			System.out.println("  Nenhum conteúdo encontrado para análise  ");
+			System.out.println("  Nenhum conteudo encontrado para analise  ");
 			System.out.println("-------------------------------------------");
 		}
 		return conteudoArq;
@@ -54,16 +58,33 @@ public class OperacoesMenuUtil {
 
 	private static void exibirMenuPrincipal() {
 		System.out.println("-------------------Menu-------------------");
-		System.out.println("1 - Análise Léxica ");
-		System.out.println("2 - Análise Sintática ");
-		System.out.println("3 - Análise Semântica ");
-		System.out.println("4 - Análise Completa ");
+		System.out.println("1 - Analise Lexica ");
+		System.out.println("2 - Analise Sintatica ");
+		System.out.println("3 - Analise Semantica ");
+		System.out.println("4 - Analise Completa ");
 		System.out.println("5 - Sair");
 		System.out.println("------------------------------------------");
 	}
 
 	private static void analisaLexica() {
-		analiseConteudo.analisaLexica(dadosCompilacao);
+		Map<TipoLexama, List<String>> tokens = analiseConteudo.analisaLexica(dadosCompilacao);
+
+		System.out.println("------------------------------------------");
+		System.out.println("Tabela lexica:");
+		System.out.println("------------------------------------------");
+		for (Entry<TipoLexama, List<String>> umToken : tokens.entrySet()) {
+			umToken.getValue().stream().forEach(umCaso -> {				
+				System.out.print("[ Token: ");				
+				System.out.print(umCaso + " - ");
+				System.out.print("Lexema: ");
+				System.out.print(umToken.getKey().name() + " - ");
+				System.out.print("Descricao: ");
+				System.out.print(umToken.getKey().getDescricao());
+				System.out.print(" ]");
+				System.out.println("");
+			});
+		}
+		System.out.println("------------------------------------------");
 	}
 
 	private static void analisaSintatica() {
@@ -75,7 +96,9 @@ public class OperacoesMenuUtil {
 	}
 
 	private static void analisaCompleta() {
-		analiseConteudo.analisaCompleta(dadosCompilacao);
+		analisaLexica();
+		analisaSintatica();
+		analisaSemantica();
 	}
 	
 }
