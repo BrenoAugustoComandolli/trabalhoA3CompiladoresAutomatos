@@ -52,7 +52,7 @@ public class OperacoesMenuUtil {
 				System.out.println("Opcao digitada invalida!");
 				break;
 			}
-		} while (opcao != 3);
+		} while (opcao != 5);
 		teclado.close();
 	}
 
@@ -88,7 +88,7 @@ public class OperacoesMenuUtil {
 	}
 
 	private static void analisaSintatica() {
-		analiseConteudo.analisaSemantica(dadosCompilacao);
+		analiseConteudo.analisaSintatica(dadosCompilacao);
 	}
 
 	private static void analisaSemantica() {

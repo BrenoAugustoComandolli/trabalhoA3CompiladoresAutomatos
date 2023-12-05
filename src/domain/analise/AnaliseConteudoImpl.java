@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import data.DadosCompilacao;
+import domain.analise.SintaticoConstants;
 
 public class AnaliseConteudoImpl implements IAnaliseConteudo {
 
@@ -49,7 +51,54 @@ public class AnaliseConteudoImpl implements IAnaliseConteudo {
 
 	@Override
 	public void analisaSintatica(DadosCompilacao dados) {
+		Stack<Character> parenteses = new Stack<>();
+		Stack<Character> chaves = new Stack<>();
 
+		for (char caracterAnalise : dados.getConteudoAnalise().toCharArray()) 
+		{
+			if (caracterAnalise == SintaticoConstants.PARENTESE_ABERTO) 
+			{
+				parenteses.push(caracterAnalise);
+		    } 
+			else if (caracterAnalise == SintaticoConstants.PARENTESE_FECHADO) 
+		    {
+		    	if (parenteses.isEmpty()) 
+		    	{
+		    		System.out.println("Parêntese aberto não foi fechado");
+		    		return;
+		        } 
+		    	else 
+		          parenteses.pop();
+		    }
+			else if (caracterAnalise == SintaticoConstants.CHAVE_ABERTO)
+			{
+            chaves.push(caracterAnalise);
+			} 
+			else if (caracterAnalise == SintaticoConstants.CHAVE_FECHADO)
+			{
+				if (!chaves.isEmpty())
+				{
+					System.out.println("Chave aberta não foi fechada");
+					return;
+				}
+				else 
+					chaves.pop();
+			}
+		}
+
+		if (!parenteses.isEmpty()) 
+		{
+			System.out.println("Parêntese aberto não foi fechado");
+			return;
+		}
+		
+		if (!chaves.isEmpty()) 
+		{
+			System.out.println("Chave aberta não foi fechada");
+			return;
+        }
+		
+		System.out.println("Compilado com sucesso!");
 	}
 
 	@Override
