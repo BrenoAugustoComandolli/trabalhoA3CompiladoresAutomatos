@@ -8,7 +8,7 @@ import data.DadosCompilacao;
 public interface IAnaliseConteudo {
 
 	Map<TipoLexama, List<String>> analisaLexica(DadosCompilacao dados);
-	void analisaSintatica(DadosCompilacao dados);
+	List<String> analisaSintatica(Map<TipoLexama, List<String>> tokens);
 	void analisaSemantica(DadosCompilacao dados);
 
 }

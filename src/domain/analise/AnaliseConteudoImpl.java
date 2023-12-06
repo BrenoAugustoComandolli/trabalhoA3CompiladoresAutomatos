@@ -1,15 +1,15 @@
 package domain.analise;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.EnumMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import data.DadosCompilacao;
-import domain.analise.SintaticoConstants;
 
 public class AnaliseConteudoImpl implements IAnaliseConteudo {
 
@@ -50,56 +50,74 @@ public class AnaliseConteudoImpl implements IAnaliseConteudo {
 	}
 
 	@Override
-	public void analisaSintatica(DadosCompilacao dados) {
-		Stack<Character> parenteses = new Stack<>();
-		Stack<Character> chaves = new Stack<>();
-
-		for (char caracterAnalise : dados.getConteudoAnalise().toCharArray()) 
-		{
-			if (caracterAnalise == SintaticoConstants.PARENTESE_ABERTO) 
-			{
-				parenteses.push(caracterAnalise);
-		    } 
-			else if (caracterAnalise == SintaticoConstants.PARENTESE_FECHADO) 
-		    {
-		    	if (parenteses.isEmpty()) 
-		    	{
-		    		System.out.println("Parêntese aberto não foi fechado");
-		    		return;
-		        } 
-		    	else 
-		          parenteses.pop();
-		    }
-			else if (caracterAnalise == SintaticoConstants.CHAVE_ABERTO)
-			{
-            chaves.push(caracterAnalise);
-			} 
-			else if (caracterAnalise == SintaticoConstants.CHAVE_FECHADO)
-			{
-				if (!chaves.isEmpty())
-				{
-					System.out.println("Chave aberta não foi fechada");
-					return;
-				}
-				else 
-					chaves.pop();
-			}
-		}
-
-		if (!parenteses.isEmpty()) 
-		{
-			System.out.println("Parêntese aberto não foi fechado");
-			return;
-		}
+	public List<String> analisaSintatica(Map<TipoLexama, List<String>> tokens) {
+		List<String> logs = new ArrayList<>();
+		boolean valido = true;
 		
-		if (!chaves.isEmpty()) 
-		{
-			System.out.println("Chave aberta não foi fechada");
-			return;
-        }
-		
-		System.out.println("Compilado com sucesso!");
+		Deque<Character> parenteses = new LinkedList<>();
+	    for (String umToken : tokens.get(TipoLexama.PARENTESES)) {
+		    valido = valido && verificaSeHaParenteseAbertoNaoFechado(logs, parenteses, umToken.charAt(0)); 
+	    }
+	    valido = valido && verificaSeHaParenteseFechadoSemAbertura(logs, parenteses);
+	    
+	    Deque<Character> chaves = new LinkedList<>();
+	    for (String umToken : tokens.get(TipoLexama.CHAVE)) {
+		    valido = valido && verificaSeHaChaveAbertaNaoFechada(logs, chaves, umToken.charAt(0));
+	    }
+	    valido = valido && verificaSeHaChaveFechadaNaoAberta(logs, chaves);
+	    
+	    if(valido) {	    	
+	    	logs.add("Compilado com sucesso!");
+	    }
+	    return logs;
 	}
+
+	private boolean verificaSeHaChaveAbertaNaoFechada(List<String> logs, Deque<Character> chaves, char caracterAnalise) {
+		if (caracterAnalise == SintaticoConstants.CHAVE_ABERTO) {
+		    chaves.push(caracterAnalise);
+		}
+		if (caracterAnalise == SintaticoConstants.CHAVE_FECHADO) {
+		    if (chaves.isEmpty()) {
+		    	logs.add(">> Ha chaves fechadas sem abertura");
+		        return false;
+		    } else {
+		        chaves.pop();
+		    }
+		}
+		return true;
+	}
+
+	private boolean verificaSeHaParenteseAbertoNaoFechado(List<String> logs, Deque<Character> parenteses, char caracterAnalise) {
+		if(caracterAnalise == SintaticoConstants.PARENTESE_ABERTO) {
+		    parenteses.push(caracterAnalise);
+		}
+		if (caracterAnalise == SintaticoConstants.PARENTESE_FECHADO) {
+		    if (parenteses.isEmpty()) {
+		    	logs.add(">> Ha parenteses fechados sem abertura");
+		    	return false;
+		    } else {
+		        parenteses.pop();
+		    }
+		}
+		return true;
+	}
+
+	private boolean verificaSeHaChaveFechadaNaoAberta(List<String> logs, Deque<Character> chaves) {
+		if (!chaves.isEmpty()) {
+	    	logs.add(">> Ha chaves abertas sem fechamento");
+	        return false;
+	    }
+		return true;
+	}
+
+	private boolean verificaSeHaParenteseFechadoSemAbertura(List<String> logs, Deque<Character> parenteses) {
+		if (!parenteses.isEmpty()) {
+	    	logs.add(">> Ha parenteses abertos sem fechamento");
+	        return false;
+	    }
+		return true;
+	}
+
 
 	@Override
 	public void analisaSemantica(DadosCompilacao dados) {

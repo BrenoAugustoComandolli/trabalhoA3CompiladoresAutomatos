@@ -88,7 +88,13 @@ public class OperacoesMenuUtil {
 	}
 
 	private static void analisaSintatica() {
-		analiseConteudo.analisaSintatica(dadosCompilacao);
+		Map<TipoLexama, List<String>> tokens = analiseConteudo.analisaLexica(dadosCompilacao);
+		List<String> logs = analiseConteudo.analisaSintatica(tokens);
+		System.out.println("------------------------------------------");
+		System.out.println("Analise sintatica:");
+		System.out.println("------------------------------------------");
+		logs.forEach(System.out::println);
+		System.out.println("------------------------------------------");
 	}
 
 	private static void analisaSemantica() {

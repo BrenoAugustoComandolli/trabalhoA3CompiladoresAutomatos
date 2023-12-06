@@ -6,8 +6,10 @@ public enum TipoLexama {
 	ID("[a-zA-Z]+", "Identificador", false), 
 	NUM("\\d+", "Numero inteiro", false), 
 	REAL("\\d+\\.\\d+", "Numero real", false), 
-	WHITE_SPACE("[ \\t]+", "Espaco em branco", false);
-
+	WHITE_SPACE("[ \\t]+", "Espaco em branco", false),
+	CHAVE("[{}]", "Chave", false),
+	PARENTESES("[()]", "Parenteses", false);
+	
 	private String padrao;
 	private String descricao;
 	private boolean palavraReservada;
