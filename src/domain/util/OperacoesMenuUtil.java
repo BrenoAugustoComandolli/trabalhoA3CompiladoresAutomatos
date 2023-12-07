@@ -69,22 +69,24 @@ public class OperacoesMenuUtil {
 	private static void analisaLexica() {
 		Map<TipoLexama, List<String>> tokens = analiseConteudo.analisaLexica(dadosCompilacao);
 
-		System.out.println("------------------------------------------");
-		System.out.println("Tabela lexica:");
-		System.out.println("------------------------------------------");
-		for (Entry<TipoLexama, List<String>> umToken : tokens.entrySet()) {
-			umToken.getValue().stream().forEach(umCaso -> {				
-				System.out.print("[ Token: ");				
-				System.out.print(umCaso + " - ");
-				System.out.print("Lexema: ");
-				System.out.print(umToken.getKey().name() + " - ");
-				System.out.print("Descricao: ");
-				System.out.print(umToken.getKey().getDescricao());
-				System.out.print(" ]");
-				System.out.println("");
-			});
+		if(!tokens.isEmpty()) {			
+			System.out.println("------------------------------------------");
+			System.out.println("Tabela lexica:");
+			System.out.println("------------------------------------------");
+			for (Entry<TipoLexama, List<String>> umToken : tokens.entrySet()) {
+				umToken.getValue().stream().forEach(umCaso -> {				
+					System.out.print("[ Token: ");				
+					System.out.print(umCaso + " - ");
+					System.out.print("Lexema: ");
+					System.out.print(umToken.getKey().name() + " - ");
+					System.out.print("Descricao: ");
+					System.out.print(umToken.getKey().getDescricao());
+					System.out.print(" ]");
+					System.out.println("");
+				});
+			}
+			System.out.println("------------------------------------------");
 		}
-		System.out.println("------------------------------------------");
 	}
 
 	private static void analisaSintatica() {
@@ -98,7 +100,13 @@ public class OperacoesMenuUtil {
 	}
 
 	private static void analisaSemantica() {
-		analiseConteudo.analisaSemantica(dadosCompilacao);
+		Map<TipoLexama, List<String>> tokens = analiseConteudo.analisaLexica(dadosCompilacao);
+		List<String> logs = analiseConteudo.analisaSemantica(dadosCompilacao, tokens);
+		System.out.println("------------------------------------------");
+		System.out.println("Analise semantica:");
+		System.out.println("------------------------------------------");
+		logs.forEach(System.out::println);
+		System.out.println("------------------------------------------");
 	}
 
 	private static void analisaCompleta() {

@@ -1,1 +1,3 @@
-if (breno > 0) {}
+int breno := 1 
+String batata := 3 
+if (breno > batata) {}

@@ -1,6 +1,7 @@
 package domain.analise;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.EnumMap;
 import java.util.LinkedList;
@@ -118,10 +119,100 @@ public class AnaliseConteudoImpl implements IAnaliseConteudo {
 		return true;
 	}
 
-
 	@Override
-	public void analisaSemantica(DadosCompilacao dados) {
+	public List<String> analisaSemantica(DadosCompilacao dados, Map<TipoLexama, List<String>> tokens) {	
+		List<String> logs = new ArrayList<>();
+		verificaSeIdentificadoresForamDecladados(dados.getConteudoAnalise(), tokens, logs);
+		verificaSeOperacoesEntreNumerosParaVariaveisNumerericas(dados.getConteudoAnalise(), tokens, logs);
+		
+		if(logs.isEmpty()) {	    	
+		   logs.add("Compilado com sucesso!");
+		}
+		return logs;
+	}
 
+	private void verificaSeIdentificadoresForamDecladados(String conteudoAnalise, Map<TipoLexama, List<String>> tokens, List<String> logs) {
+		List<String> identificadores = tokens.get(TipoLexama.ID);
+		
+		if(identificadores != null) {			
+			identificadores = removeItensDuplicados(identificadores);
+			
+			identificadores.forEach(umId -> {
+				List<TipoLexama> enums = Arrays.asList(TipoLexama.values());
+				List<TipoLexama> tipagens = filtrarTipagens(enums);
+				boolean encontrou = false;
+				
+				for (TipoLexama umTipo : tipagens) {
+					Pattern pattern = Pattern.compile(umTipo.getPadrao()+"\\s+("+umId+")\\s*:=\\s*(.+)");
+					Matcher matcher = pattern.matcher(conteudoAnalise);	
+					
+					if(matcher.find()) {
+						encontrou = true;
+					}
+				}
+				if(!encontrou) {
+					logs.add(">> Identificador "+umId+" nao foi declarado");
+				}
+			});
+		}
+	}
+
+	private void verificaSeOperacoesEntreNumerosParaVariaveisNumerericas(String conteudoAnalise, Map<TipoLexama, List<String>> tokens, List<String> logs) {
+		List<String> operadores = new ArrayList<>();
+		operadores.addAll(tokens.get(TipoLexama.OPERADOR_MATEMATICO));
+		operadores.addAll(tokens.get(TipoLexama.OPERADOR_RELACIONAL));
+		
+		if(!operadores.isEmpty()) {			
+			operadores = removeItensDuplicados(operadores);
+			
+			operadores.forEach(umOperador -> {
+				Pattern pattern = Pattern.compile("\\b(\\w*)\\s*" + umOperador + "\\s*(\\w*)\\b");
+				Matcher matcher = pattern.matcher(conteudoAnalise);	
+				
+				while (matcher.find()) {
+					String variaveisUsadas = matcher.group().replace(" "+umOperador+" ", ";");
+					validaOperacaoNumericaRealizada(conteudoAnalise, tokens, logs, variaveisUsadas);
+				}
+			});
+		}
+	}
+
+	private void validaOperacaoNumericaRealizada(String conteudoAnalise, Map<TipoLexama, List<String>> tokens,
+			List<String> logs, String variaveisUsadas) {
+
+		String[] arrayAvariaveis = variaveisUsadas.split(";");
+		List<String> identificadores = tokens.get(TipoLexama.ID);
+
+		for (String umaVariavel : arrayAvariaveis) {
+			if(!umaVariavel.isBlank()) {
+				if(identificadores.contains(umaVariavel)) {
+					Pattern patternInteiro = Pattern.compile(TipoLexama.INTEIRO.getPadrao()+"\\s+("+umaVariavel+")\\s*:=\\s*(.+)");
+					Matcher matcherInteiro = patternInteiro.matcher(conteudoAnalise);
+					if(!matcherInteiro.find()) {
+						logs.add(">> Operacao invalida: identificador "+umaVariavel+" nao e numerico, mas ta sendo usado em uma operacao numerica");
+					}
+				}else if (!isNumeric(umaVariavel.trim())) {
+					logs.add(">> Operacao invalida: "+umaVariavel+" nao e um numerico, mas ta sendo usado em uma operacao numerica");
+				}
+			}
+		}
+	}
+	
+	private boolean isNumeric(String str) {
+	    try {
+	        Double.parseDouble(str);
+	        return true;
+	    } catch (NumberFormatException e) {
+	        return false;
+	    }
+	}
+	
+	private List<TipoLexama> filtrarTipagens(List<TipoLexama> enums) {
+	    return enums.stream().filter(TipoLexama::isTipagem).toList();
+	}
+
+	private List<String> removeItensDuplicados(List<String> lista) {
+		return lista.stream().distinct().toList();
 	}
 
 }

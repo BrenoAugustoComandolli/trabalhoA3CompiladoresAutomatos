@@ -9,6 +9,6 @@ public interface IAnaliseConteudo {
 
 	Map<TipoLexama, List<String>> analisaLexica(DadosCompilacao dados);
 	List<String> analisaSintatica(Map<TipoLexama, List<String>> tokens);
-	void analisaSemantica(DadosCompilacao dados);
+	List<String> analisaSemantica(DadosCompilacao dados, Map<TipoLexama, List<String>> tokens);
 
 }
